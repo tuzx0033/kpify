@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { removeAccents } from "../utils/text";
 import { fetchAllTasks } from "../api";
 import { exportTasksToExcel } from "../utils/exportExcel";
 
@@ -65,10 +66,11 @@ export default function TaskTable({ tasks, loading }) {
 
   const filtered = useMemo(() => {
     return (tasks || []).filter(t => {
-      const q = search.toLowerCase();
-      const matchSearch = !q || t.name?.toLowerCase().includes(q)
-        || (t.assignees || []).join(" ").toLowerCase().includes(q)
-        || (t.tags || []).join(" ").toLowerCase().includes(q);
+      const q = removeAccents(search);
+      const matchSearch = !q 
+        || removeAccents(t.name || "").includes(q)
+        || removeAccents((t.assignees || []).join(" ")).includes(q)
+        || removeAccents((t.tags || []).join(" ")).includes(q);
       const matchStatus = statusFilter === "all" || t.status === statusFilter;
       const matchTag = tagFilter === "all" || (t.tags || []).includes(tagFilter);
       return matchSearch && matchStatus && matchTag;

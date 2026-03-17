@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { removeAccents } from "../utils/text";
 
 function dhsColor(dhs) {
   if (dhs === null || dhs === undefined) return "var(--text-dim)";
@@ -23,8 +24,16 @@ function kpiBar(pct) {
 
 export default function KpiTable({ data, loading }) {
   const [sort, setSort] = useState({ col: "kpi_pct", dir: -1 });
+  const [search, setSearch] = useState("");
 
-  const sorted = [...(data || [])].sort((a, b) => {
+  const filtered = (data || []).filter(row => {
+    if (!search) return true;
+    const normalizedSearch = removeAccents(search);
+    const normalizedAssignee = removeAccents(row.assignee || "");
+    return normalizedAssignee.includes(normalizedSearch);
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
     const av = a[sort.col] ?? -Infinity;
     const bv = b[sort.col] ?? -Infinity;
     return sort.dir * (bv - av);
@@ -32,17 +41,29 @@ export default function KpiTable({ data, loading }) {
 
   const th = (label, col) => (
     <th onClick={() => setSort(s => ({ col, dir: s.col === col ? -s.dir : -1 }))}
-      style={{ padding: "10px 14px", textAlign: "left", fontSize: 12, color: "var(--text-muted)",
+      style={{
+        padding: "10px 14px", textAlign: "left", fontSize: 12, color: "var(--text-muted)",
         fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", userSelect: "none",
-        background: "var(--surface)", borderBottom: "1px solid var(--border)" }}>
+        background: "var(--surface)", borderBottom: "1px solid var(--border)"
+      }}>
       {label}{sort.col === col ? (sort.dir === -1 ? " ▼" : " ▲") : ""}
     </th>
   );
 
   return (
     <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, overflow: "hidden" }}>
-      <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", fontWeight: 600, fontSize: 15, color: "var(--text-primary)" }}>
-        🏆 KPI theo thành viên
+      <div style={{ padding: "12px 20px", borderBottom: "1px solid var(--border)",
+        display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+        <div style={{ fontWeight: 600, fontSize: 15, color: "var(--text-primary)" }}>
+          🏆 KPI theo thành viên
+        </div>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="🔍 Tìm theo tên..."
+          style={{ background: "var(--input-bg)", border: "1px solid var(--border)", borderRadius: 8,
+            padding: "6px 12px", color: "var(--text-sec)", fontSize: 13, width: 220 }}
+        />
       </div>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>

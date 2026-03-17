@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { removeAccents } from "../utils/text";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 const SEVERITY_COLOR  = { critical: "#ef4444", warning: "#f59e0b", info: "#3b82f6" };
@@ -54,8 +55,8 @@ export default function CompliancePanel({ data, loading }) {
 
   // Filter task issues
   const filtered = (task_issues || []).filter(t => {
-    const q = search.toLowerCase();
-    const matchSearch = !q || t.name?.toLowerCase().includes(q) || (t.assignees || []).join(" ").toLowerCase().includes(q);
+    const q = removeAccents(search);
+    const matchSearch = !q || removeAccents(t.name || "").includes(q) || removeAccents((t.assignees || []).join(" ")).includes(q);
     const matchSev = sevFilter === "all"
       || (sevFilter === "score"    && t.score_blocked)
       || (sevFilter === "critical" && t.critical_count > 0)
@@ -336,8 +337,8 @@ export default function CompliancePanel({ data, loading }) {
 // ── Component riêng cho tab Đã đầy đủ ──────────────────────────────────────
 function CleanTasksTab({ tasks, search, setSearch, page, setPage, pageSize }) {
   const filtered = tasks.filter(t => {
-    const q = search.toLowerCase();
-    return !q || t.name?.toLowerCase().includes(q) || (t.assignees || []).join(" ").toLowerCase().includes(q);
+    const q = removeAccents(search);
+    return !q || removeAccents(t.name || "").includes(q) || removeAccents((t.assignees || []).join(" ")).includes(q);
   });
   const paged      = filtered.slice(page * pageSize, (page + 1) * pageSize);
   const totalPages = Math.ceil(filtered.length / pageSize);
