@@ -1,0 +1,25 @@
+services:
+  # ── Go Backend ────────────────────────────────────────────────────────────────
+  - type: web
+    name: kpi-dashboard-api
+    runtime: docker
+    dockerfilePath: ./dashboard/backend-go/Dockerfile
+    dockerContext: ./dashboard/backend-go
+    plan: free                  # hoặc starter ($7/tháng) nếu cần uptime 24/7
+    region: singapore           # gần Việt Nam nhất
+    envVars:
+      - key: DB_URL
+        fromDatabase:
+          name: kpi-db
+          property: connectionString
+      - key: TOKEN
+        value: pk_107627547_EQSQELUF5LVO8HIGB2Z5W67V7LLDBUB4
+      - key: TZ
+        value: Asia/Ho_Chi_Minh
+    healthCheckPath: /health
+
+  # ── PostgreSQL ────────────────────────────────────────────────────────────────
+databases:
+  - name: kpi-db
+    plan: free                  # free: hết hạn sau 90 ngày → dùng starter $7/tháng để lưu lâu dài
+    region: singapore

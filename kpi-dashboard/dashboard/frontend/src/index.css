@@ -1,0 +1,38 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', 'Segoe UI', sans-serif; }
+
+/* ── Dark theme (default) ─────────────────────────────────────────────────── */
+:root {
+  --bg:           #0f172a;
+  --surface:      #1e293b;
+  --surface-alt:  #0f172a44;
+  --border:       #334155;
+  --border-mid:   #475569;
+  --text-primary: #f1f5f9;
+  --text-sec:     #e2e8f0;
+  --text-muted:   #94a3b8;
+  --text-dim:     #64748b;
+  --input-bg:     #0f172a;
+  color-scheme: dark;
+}
+
+/* ── Light theme ──────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:           #f1f5f9;
+  --surface:      #ffffff;
+  --surface-alt:  #f8fafc44;
+  --border:       #e2e8f0;
+  --border-mid:   #cbd5e1;
+  --text-primary: #0f172a;
+  --text-sec:     #1e293b;
+  --text-muted:   #475569;
+  --text-dim:     #94a3b8;
+  --input-bg:     #f8fafc;
+  color-scheme: light;
+}
+
+body { background: var(--bg); color: var(--text-sec); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
