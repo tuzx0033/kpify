@@ -75,7 +75,7 @@ func refreshCache() {
 		if all, err := loadAllTasksFromDB(); err == nil {
 			cache.set(all, ws, we)
 			logSyncDone(syncID, len(all), "")
-			log.Printf("[fetch] Xong: %d tasks tuần → cache %d tasks tổng từ DB", len(tasks), len(all))
+			log.Printf("[fetch] Xong : %d tasks tuần → cache %d tasks tổng từ DB", len(tasks), len(all))
 			return
 		}
 	}
