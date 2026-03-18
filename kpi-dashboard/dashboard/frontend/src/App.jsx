@@ -272,7 +272,7 @@ export default function App() {
           </Section>
 
           <Section title="KPI cá nhân">
-            <KpiTable data={kpi} loading={loading} />
+            <KpiTable data={kpi} loading={loading} tasks={tasks} />
           </Section>
         </>}
       </main>

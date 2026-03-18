@@ -1,4 +1,5 @@
 import { useState } from "react";
+import EmployeeDetailModal from "./EmployeeDetailModal";
 
 function dhsColor(dhs) {
   if (dhs === null || dhs === undefined) return "var(--text-dim)";
@@ -21,9 +22,10 @@ function kpiBar(pct) {
   );
 }
 
-export default function KpiTable({ data, loading }) {
+export default function KpiTable({ data, loading, tasks }) {
   const [sort, setSort] = useState({ col: "kpi_pct", dir: -1 });
   const [selectedAssignee, setSelectedAssignee] = useState("");
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const assigneeOptions = [...new Set(
     (data || [])
     .map(row => row.assignee)
@@ -100,12 +102,21 @@ export default function KpiTable({ data, loading }) {
             {!loading && sorted.map((row, i) => (
               <tr key={row.assignee} style={{ background: i % 2 === 0 ? "transparent" : "var(--surface-alt)" }}>
                 <td style={{ padding: "10px 14px", color: "var(--text-muted)", fontWeight: 600 }}>{row.stt}</td>
-                <td style={{ padding: "10px 14px", fontWeight: 600, fontSize: 14, color: "var(--text-primary)" }}>{row.assignee}</td>
+                <td onClick={() => setSelectedEmployee(row)}
+                  style={{ padding: "10px 14px", fontWeight: 600, fontSize: 14, color: "#93c5fd",
+                    cursor: "pointer", transition: "color .15s" }}
+                  onMouseEnter={e => e.target.style.textDecoration = "underline"}
+                  onMouseLeave={e => e.target.style.textDecoration = "none"}
+                >{row.assignee}</td>
                 <td style={{ padding: "10px 14px" }}>{kpiBar(row.kpi_pct)}</td>
                 <td style={{ padding: "10px 14px", fontWeight: 700, color: dhsColor(row.dhs) }}>
                   {row.dhs != null ? row.dhs.toFixed(3) : "—"}
                 </td>
-                <td style={{ padding: "10px 14px", color: "#a5f3fc" }}>{row.total_score?.toFixed(1) ?? "—"}</td>
+                <td onClick={() => setSelectedEmployee(row)}
+                  style={{ padding: "10px 14px", color: "#a5f3fc", cursor: "pointer", transition: "color .15s" }}
+                  onMouseEnter={e => e.target.style.textDecoration = "underline"}
+                  onMouseLeave={e => e.target.style.textDecoration = "none"}
+                >{row.total_score?.toFixed(1) ?? "—"}</td>
                 <td style={{ padding: "10px 14px", color: "var(--text-muted)" }}>{row.total_weight?.toFixed(1) ?? "—"}</td>
                 <td style={{ padding: "10px 14px", color: "var(--text-sec)" }}>{row.tasks_total}</td>
                 <td style={{ padding: "10px 14px", color: "#22c55e" }}>{row.tasks_on_time}</td>
@@ -119,6 +130,15 @@ export default function KpiTable({ data, loading }) {
           </tbody>
         </table>
       </div>
+
+      {selectedEmployee && (
+        <EmployeeDetailModal
+          assigneeName={selectedEmployee.assignee}
+          kpiRow={selectedEmployee}
+          tasks={tasks || []}
+          onClose={() => setSelectedEmployee(null)}
+        />
+      )}
     </div>
   );
 }
