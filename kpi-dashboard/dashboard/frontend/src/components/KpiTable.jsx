@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { removeAccents } from "../utils/text";
 
 function dhsColor(dhs) {
   if (dhs === null || dhs === undefined) return "var(--text-dim)";
@@ -24,20 +23,28 @@ function kpiBar(pct) {
 
 export default function KpiTable({ data, loading }) {
   const [sort, setSort] = useState({ col: "kpi_pct", dir: -1 });
-  const [search, setSearch] = useState("");
+  const [selectedAssignee, setSelectedAssignee] = useState("");
+  const assigneeOptions = [...new Set(
+    (data || [])
+    .map(row => row.assignee)
+    .filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
 
   const filtered = (data || []).filter(row => {
-    if (!search) return true;
-    const normalizedSearch = removeAccents(search);
-    const normalizedAssignee = removeAccents(row.assignee || "");
-    return normalizedAssignee.includes(normalizedSearch);
+     if (!selectedAssignee) return true;
+      return row.assignee === selectedAssignee;
   });
 
-  const sorted = [...filtered].sort((a, b) => {
+  const sorted = [...filtered]
+  .sort((a, b) => {
     const av = a[sort.col] ?? -Infinity;
     const bv = b[sort.col] ?? -Infinity;
     return sort.dir * (bv - av);
-  });
+  })
+  .map((row, index) => ({
+    ...row,
+    stt: index + 1
+  }));
 
   const th = (label, col) => (
     <th onClick={() => setSort(s => ({ col, dir: s.col === col ? -s.dir : -1 }))}
@@ -57,18 +64,24 @@ export default function KpiTable({ data, loading }) {
         <div style={{ fontWeight: 600, fontSize: 15, color: "var(--text-primary)" }}>
           🏆 KPI theo thành viên
         </div>
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="🔍 Tìm theo tên..."
+        <select
+          value={selectedAssignee}
+          onChange={e => setSelectedAssignee(e.target.value)}
           style={{ background: "var(--input-bg)", border: "1px solid var(--border)", borderRadius: 8,
             padding: "6px 12px", color: "var(--text-sec)", fontSize: 13, width: 220 }}
-        />
+        > <option value="">Tất cả thành viên</option>
+  {assigneeOptions.map(name => (
+    <option key={name} value={name}>
+      {name}
+    </option>
+  ))} </select>
+        
       </div>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>
+              <th style={{ padding: "10px 14px" }}>STT</th>
               {th("Tên", "assignee")}
               {th("KPI%", "kpi_pct")}
               {th("ĐHS", "dhs")}
@@ -82,10 +95,11 @@ export default function KpiTable({ data, loading }) {
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={9} style={{ padding: 32, textAlign: "center", color: "var(--text-dim)" }}>Đang tải...</td></tr>
+              <tr><td colSpan={10} style={{ padding: 32, textAlign: "center", color: "var(--text-dim)" }}>Đang tải...</td></tr>
             )}
             {!loading && sorted.map((row, i) => (
               <tr key={row.assignee} style={{ background: i % 2 === 0 ? "transparent" : "var(--surface-alt)" }}>
+                <td style={{ padding: "10px 14px", color: "var(--text-muted)", fontWeight: 600 }}>{row.stt}</td>
                 <td style={{ padding: "10px 14px", fontWeight: 600, fontSize: 14, color: "var(--text-primary)" }}>{row.assignee}</td>
                 <td style={{ padding: "10px 14px" }}>{kpiBar(row.kpi_pct)}</td>
                 <td style={{ padding: "10px 14px", fontWeight: 700, color: dhsColor(row.dhs) }}>
@@ -100,7 +114,7 @@ export default function KpiTable({ data, loading }) {
               </tr>
             ))}
             {!loading && sorted.length === 0 && (
-              <tr><td colSpan={9} style={{ padding: 32, textAlign: "center", color: "var(--text-dim)" }}>Không có dữ liệu</td></tr>
+              <tr><td colSpan={10} style={{ padding: 32, textAlign: "center", color: "var(--text-dim)" }}>Không có dữ liệu</td></tr>
             )}
           </tbody>
         </table>
