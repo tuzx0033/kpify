@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kpi_dashboard
+      POSTGRES_USER: kpi
+      POSTGRES_PASSWORD: kpi123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kpi -d kpi_dashboard"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    # Dùng image bạn đã build và push lên Docker Hub
+    image: thienhaisoft/kpi-performance:backend-${GIT_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      DB_URL: postgres://kpi:kpi123@db:5432/kpi_dashboard?sslmode=disable
+      TOKEN: pk_107627547_EQSQELUF5LVO8HIGB2Z5W67V7LLDBUB4
+      TZ: Asia/Ho_Chi_Minh
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  frontend:
+    # Lưu ý: frontend đã "bake" VITE_API_URL lúc build,
+    # nên khi build image frontend để deploy chung compose, hãy dùng:
+    # --build-arg VITE_API_URL=http://backend:8080
+    image: thienhaisoft/kpi-performance:frontend-${GIT_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  pgdata:
+

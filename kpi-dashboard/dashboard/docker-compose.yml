@@ -41,7 +41,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: http://localhost:8080
+        # In docker-compose, frontend gọi backend qua hostname service name "backend"
+        VITE_API_URL: http://backend:8080
     restart: unless-stopped
     ports:
       - "3000:80"
